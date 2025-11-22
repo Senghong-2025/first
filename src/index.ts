@@ -1,10 +1,21 @@
 import { Hono } from 'hono'
+import { cors } from 'hono/cors'
 import telegramRouter from './routes/telegram.routes'
 import cloudinaryRouter from './routes/cloudinary.routes'
 import githubRouter from './routes/github.routes'
 import type { CloudflareBindings } from './types/bindings'
 
 const app = new Hono<{ Bindings: CloudflareBindings }>()
+
+// Enable CORS for all origins
+app.use('/*', cors({
+  origin: '*',
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowHeaders: ['Content-Type', 'Authorization'],
+  exposeHeaders: ['Content-Length', 'X-Request-Id'],
+  maxAge: 600,
+  credentials: true,
+}))
 
 app.get('/', (c) => {
   return c.html(`
@@ -92,9 +103,9 @@ app.get('/', (c) => {
   `)
 })
 
-// Mount routes
-app.route('/telegram', telegramRouter)
-app.route('/github', githubRouter)
-app.route('/', cloudinaryRouter)
+// Mount routes with /api prefix
+app.route('/api/telegram', telegramRouter)
+app.route('/api/github', githubRouter)
+app.route('/api', cloudinaryRouter)
 
 export default app
