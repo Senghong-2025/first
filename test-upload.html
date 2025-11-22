@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiple Image Upload Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .upload-section {
+            border: 2px dashed #ccc;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f4f4f4;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+        .file-list {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e8f5e9;
+            border-radius: 5px;
+        }
+        .error {
+            color: red;
+            background-color: #ffebee;
+        }
+        .success {
+            color: green;
+            background-color: #e8f5e9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cloudinary Multiple Image Upload Test</h1>
+
+    <div class="upload-section">
+        <h2>Single Upload</h2>
+        <input type="file" id="singleFile" accept="image/*">
+        <button onclick="uploadSingle()">Upload Single Image</button>
+    </div>
+
+    <div class="upload-section">
+        <h2>Multiple Upload</h2>
+        <input type="file" id="multipleFiles" accept="image/*" multiple>
+        <button onclick="uploadMultiple()">Upload Multiple Images</button>
+        <div id="fileList" class="file-list" style="display: none;"></div>
+    </div>
+
+    <div id="result"></div>
+
+    <script>
+        const API_URL = 'http://localhost:8789';
+
+        // Show selected files
+        document.getElementById('multipleFiles').addEventListener('change', function(e) {
+            const fileList = document.getElementById('fileList');
+            const files = e.target.files;
+
+            if (files.length > 0) {
+                fileList.style.display = 'block';
+                fileList.innerHTML = `<strong>Selected files (${files.length}):</strong><br>`;
+                for (let i = 0; i < files.length; i++) {
+                    fileList.innerHTML += `${i + 1}. ${files[i].name} (${(files[i].size / 1024).toFixed(2)} KB)<br>`;
+                }
+            } else {
+                fileList.style.display = 'none';
+            }
+        });
+
+        async function uploadSingle() {
+            const fileInput = document.getElementById('singleFile');
+            const resultDiv = document.getElementById('result');
+
+            if (!fileInput.files.length) {
+                resultDiv.className = 'error';
+                resultDiv.textContent = 'Please select a file';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            resultDiv.textContent = 'Uploading...';
+
+            try {
+                const response = await fetch(`${API_URL}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                resultDiv.className = response.ok ? 'success' : 'error';
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.className = 'error';
+                resultDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function uploadMultiple() {
+            const fileInput = document.getElementById('multipleFiles');
+            const resultDiv = document.getElementById('result');
+
+            if (!fileInput.files.length) {
+                resultDiv.className = 'error';
+                resultDiv.textContent = 'Please select files';
+                return;
+            }
+
+            const formData = new FormData();
+            for (let i = 0; i < fileInput.files.length; i++) {
+                formData.append(`file${i}`, fileInput.files[i]);
+            }
+
+            resultDiv.textContent = `Uploading ${fileInput.files.length} files...`;
+
+            try {
+                const response = await fetch(`${API_URL}/upload-multiple`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                resultDiv.className = response.ok ? 'success' : 'error';
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.className = 'error';
+                resultDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

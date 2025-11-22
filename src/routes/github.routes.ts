@@ -1,0 +1,22 @@
+import { Hono } from 'hono'
+import { GitHubController } from '../controllers/github.controller'
+import type { CloudflareBindings } from '../types/bindings'
+
+const githubRouter = new Hono<{ Bindings: CloudflareBindings }>()
+
+// Verify GitHub access
+githubRouter.get('/verify', GitHubController.verifyAccess)
+
+// Upload single image to GitHub
+githubRouter.post('/upload', GitHubController.uploadImage)
+
+// Upload multiple images to GitHub
+githubRouter.post('/upload-multiple', GitHubController.uploadMultipleImages)
+
+// Delete a file from GitHub
+githubRouter.delete('/delete', GitHubController.deleteFile)
+
+// List files in a directory
+githubRouter.get('/list', GitHubController.listFiles)
+
+export default githubRouter
