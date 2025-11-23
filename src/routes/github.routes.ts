@@ -5,21 +5,21 @@ import type { EnvBindings } from '../types/bindings'
 const githubRouter = new Hono<{ Bindings: EnvBindings }>()
 
 // Verify GitHub access
-githubRouter.get('/verify', GitHubController.verifyAccess)
+githubRouter.get('/verify', (c) => GitHubController.verifyAccess(c))
 
 // Upload single image to GitHub
-githubRouter.post('/upload', GitHubController.uploadImage)
+githubRouter.post('/upload', (c) => GitHubController.uploadImage(c))
 
 // Upload multiple images to GitHub
-githubRouter.post('/upload-multiple', GitHubController.uploadMultipleImages)
+githubRouter.post('/upload-multiple', (c) => GitHubController.uploadMultipleImages(c))
 
 // Upload JSON data to GitHub
-githubRouter.post('/upload-json', GitHubController.uploadJson)
+githubRouter.post('/upload-json', (c) => GitHubController.uploadJson(c))
 
 // Delete a file from GitHub
-githubRouter.delete('/delete', GitHubController.deleteFile)
+githubRouter.delete('/delete', (c) => GitHubController.deleteFile(c))
 
 // List files in a directory
-githubRouter.get('/list', GitHubController.listFiles)
+githubRouter.get('/list', (c) => GitHubController.listFiles(c))
 
 export default githubRouter

@@ -5,12 +5,12 @@ import type { EnvBindings } from '../types/bindings'
 const telegramRouter = new Hono<{ Bindings: EnvBindings }>()
 
 // Get bot updates
-telegramRouter.get('/updates', TelegramController.getUpdates)
+telegramRouter.get('/updates', (c) => TelegramController.getUpdates(c))
 
 // Get bot information
-telegramRouter.get('/me', TelegramController.getBotInfo)
+telegramRouter.get('/me', (c) => TelegramController.getBotInfo(c))
 
 // Send a message
-telegramRouter.post('/send', TelegramController.sendMessage)
+telegramRouter.post('/send', (c) => TelegramController.sendMessage(c))
 
 export default telegramRouter

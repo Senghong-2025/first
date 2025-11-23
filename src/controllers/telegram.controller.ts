@@ -3,10 +3,14 @@ import { TelegramService } from '../services/telegram'
 import type { EnvBindings } from '../types/bindings'
 
 export class TelegramController {
+  private static getTelegramService(c: Context<{ Bindings: EnvBindings }>) {
+    const botToken = c.env.TELEGRAM_BOT_TOKEN
+    return new TelegramService(botToken)
+  }
+
   static async getUpdates(c: Context<{ Bindings: EnvBindings }>) {
     try {
-      const botToken = c.env.TELEGRAM_BOT_TOKEN
-      const telegram = new TelegramService(botToken)
+      const telegram = this.getTelegramService(c)
 
       const offset = c.req.query('offset')
         ? parseInt(c.req.query('offset')!)
@@ -40,8 +44,7 @@ export class TelegramController {
 
   static async getBotInfo(c: Context<{ Bindings: EnvBindings }>) {
     try {
-      const botToken = c.env.TELEGRAM_BOT_TOKEN
-      const telegram = new TelegramService(botToken)
+      const telegram = this.getTelegramService(c)
 
       const botInfo = await telegram.getMe()
 
@@ -64,8 +67,7 @@ export class TelegramController {
 
   static async sendMessage(c: Context<{ Bindings: EnvBindings }>) {
     try {
-      const botToken = c.env.TELEGRAM_BOT_TOKEN
-      const telegram = new TelegramService(botToken)
+      const telegram = this.getTelegramService(c)
 
       const { chatId, text } = await c.req.json()
 

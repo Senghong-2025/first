@@ -5,9 +5,9 @@ import type { EnvBindings } from '../types/bindings'
 const cloudinaryRouter = new Hono<{ Bindings: EnvBindings }>()
 
 // Upload single image to Cloudinary
-cloudinaryRouter.post('/upload', CloudinaryController.uploadImage)
+cloudinaryRouter.post('/upload', (c) => CloudinaryController.uploadImage(c))
 
 // Upload multiple images to Cloudinary
-cloudinaryRouter.post('/upload-multiple', CloudinaryController.uploadMultipleImages)
+cloudinaryRouter.post('/upload-multiple', (c) => CloudinaryController.uploadMultipleImages(c))
 
 export default cloudinaryRouter

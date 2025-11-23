@@ -3,21 +3,28 @@ import { GitHubService } from '../services/github.service'
 import type { EnvBindings } from '../types/bindings'
 
 export class GitHubController {
+  private static getGitHubService(c: Context<{ Bindings: EnvBindings }>) {
+    const token = c.env.GITHUB_TOKEN
+    const owner = c.env.GITHUB_OWNER
+    const repo = c.env.GITHUB_REPO
+
+    if (!token) {
+      throw new Error('GitHub token not configured')
+    }
+
+    return new GitHubService(token, owner, repo)
+  }
+
   static async verifyAccess(c: Context<{ Bindings: EnvBindings }>) {
     try {
-      const token = c.env.GITHUB_TOKEN
-      const owner = c.env.GITHUB_OWNER
-      const repo = c.env.GITHUB_REPO
-
-      if (!token) {
-        return c.json({ error: 'GitHub token not configured' }, 500)
-      }
-
-      const githubService = new GitHubService(token, owner, repo)
+      const githubService = this.getGitHubService(c)
       const verification = await githubService.verifyAccess()
 
       return c.json(verification, verification.authenticated ? 200 : 401)
     } catch (error) {
+      if (error instanceof Error && error.message === 'GitHub token not configured') {
+        return c.json({ error: error.message }, 500)
+      }
       console.error('GitHub verification error:', error)
       return c.json(
         {
@@ -31,16 +38,7 @@ export class GitHubController {
 
   static async uploadImage(c: Context<{ Bindings: EnvBindings }>) {
     try {
-      // Get environment variables
-      const token = c.env.GITHUB_TOKEN
-      const owner = c.env.GITHUB_OWNER
-      const repo = c.env.GITHUB_REPO
-
-      if (!token) {
-        return c.json({ error: 'GitHub token not configured' }, 500)
-      }
-
-      const githubService = new GitHubService(token, owner, repo)
+      const githubService = this.getGitHubService(c)
 
       // Get form data
       const formData = await c.req.formData()
@@ -82,6 +80,9 @@ export class GitHubController {
         200
       )
     } catch (error) {
+      if (error instanceof Error && error.message === 'GitHub token not configured') {
+        return c.json({ error: error.message }, 500)
+      }
       console.error('GitHub upload error:', error)
       return c.json(
         {
@@ -97,16 +98,7 @@ export class GitHubController {
     c: Context<{ Bindings: EnvBindings }>
   ) {
     try {
-      // Get environment variables
-      const token = c.env.GITHUB_TOKEN
-      const owner = c.env.GITHUB_OWNER
-      const repo = c.env.GITHUB_REPO
-
-      if (!token) {
-        return c.json({ error: 'GitHub token not configured' }, 500)
-      }
-
-      const githubService = new GitHubService(token, owner, repo)
+      const githubService = this.getGitHubService(c)
 
       // Get form data
       const formData = await c.req.formData()
@@ -156,6 +148,9 @@ export class GitHubController {
         200
       )
     } catch (error) {
+      if (error instanceof Error && error.message === 'GitHub token not configured') {
+        return c.json({ error: error.message }, 500)
+      }
       console.error('GitHub multiple upload error:', error)
       return c.json(
         {
@@ -170,15 +165,7 @@ export class GitHubController {
 
   static async uploadJson(c: Context<{ Bindings: EnvBindings }>) {
     try {
-      const token = c.env.GITHUB_TOKEN
-      const owner = c.env.GITHUB_OWNER
-      const repo = c.env.GITHUB_REPO
-
-      if (!token) {
-        return c.json({ error: 'GitHub token not configured' }, 500)
-      }
-
-      const githubService = new GitHubService(token, owner, repo)
+      const githubService = this.getGitHubService(c)
 
       const body = await c.req.json()
       const { data, path, message, branch } = body
@@ -216,6 +203,9 @@ export class GitHubController {
         200
       )
     } catch (error) {
+      if (error instanceof Error && error.message === 'GitHub token not configured') {
+        return c.json({ error: error.message }, 500)
+      }
       console.error('GitHub JSON upload error:', error)
       return c.json(
         {
@@ -229,15 +219,7 @@ export class GitHubController {
 
   static async deleteFile(c: Context<{ Bindings: EnvBindings }>) {
     try {
-      const token = c.env.GITHUB_TOKEN
-      const owner = c.env.GITHUB_OWNER
-      const repo = c.env.GITHUB_REPO
-
-      if (!token) {
-        return c.json({ error: 'GitHub token not configured' }, 500)
-      }
-
-      const githubService = new GitHubService(token, owner, repo)
+      const githubService = this.getGitHubService(c)
 
       // Get request body
       const body = await c.req.json()
@@ -257,6 +239,9 @@ export class GitHubController {
         200
       )
     } catch (error) {
+      if (error instanceof Error && error.message === 'GitHub token not configured') {
+        return c.json({ error: error.message }, 500)
+      }
       console.error('GitHub delete error:', error)
       return c.json(
         {
@@ -270,16 +255,7 @@ export class GitHubController {
 
   static async listFiles(c: Context<{ Bindings: EnvBindings }>) {
     try {
-      // Get environment variables
-      const token = c.env.GITHUB_TOKEN
-      const owner = c.env.GITHUB_OWNER
-      const repo = c.env.GITHUB_REPO
-
-      if (!token) {
-        return c.json({ error: 'GitHub token not configured' }, 500)
-      }
-
-      const githubService = new GitHubService(token, owner, repo)
+      const githubService = this.getGitHubService(c)
 
       // Get path from query params
       const path = c.req.query('path') || ''
@@ -301,6 +277,9 @@ export class GitHubController {
         200
       )
     } catch (error) {
+      if (error instanceof Error && error.message === 'GitHub token not configured') {
+        return c.json({ error: error.message }, 500)
+      }
       console.error('GitHub list files error:', error)
       return c.json(
         {

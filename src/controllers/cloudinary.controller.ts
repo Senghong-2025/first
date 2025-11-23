@@ -3,18 +3,17 @@ import { CloudinaryService } from '../services/cloudinary.service'
 import type { EnvBindings } from '../types/bindings'
 
 export class CloudinaryController {
+  private static getCloudinaryService(c: Context<{ Bindings: EnvBindings }>) {
+    const cloudName = c.env.CLOUDINARY_CLOUD_NAME
+    const apiKey = c.env.CLOUDINARY_API_KEY
+    const apiSecret = c.env.CLOUDINARY_API_SECRET
+
+    return new CloudinaryService(cloudName, apiKey, apiSecret)
+  }
+
   static async uploadImage(c: Context<{ Bindings: EnvBindings }>) {
     try {
-      // Get environment variables
-      const cloudName = c.env.CLOUDINARY_CLOUD_NAME
-      const apiKey = c.env.CLOUDINARY_API_KEY
-      const apiSecret = c.env.CLOUDINARY_API_SECRET
-
-      const cloudinaryService = new CloudinaryService(
-        cloudName,
-        apiKey,
-        apiSecret
-      )
+      const cloudinaryService = this.getCloudinaryService(c)
 
       // Get form data
       const formData = await c.req.formData()
@@ -41,16 +40,7 @@ export class CloudinaryController {
 
   static async uploadMultipleImages(c: Context<{ Bindings: EnvBindings }>) {
     try {
-      // Get environment variables
-      const cloudName = c.env.CLOUDINARY_CLOUD_NAME
-      const apiKey = c.env.CLOUDINARY_API_KEY
-      const apiSecret = c.env.CLOUDINARY_API_SECRET
-
-      const cloudinaryService = new CloudinaryService(
-        cloudName,
-        apiKey,
-        apiSecret
-      )
+      const cloudinaryService = this.getCloudinaryService(c)
 
       // Get form data
       const formData = await c.req.formData()
