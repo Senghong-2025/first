@@ -30,6 +30,14 @@ export class GitHubService {
   }
 
   /**
+   * Convert JSON object to base64 string
+   */
+  private jsonToBase64(data: any): string {
+    const jsonString = JSON.stringify(data, null, 2)
+    return btoa(jsonString)
+  }
+
+  /**
    * Generate a unique filename with timestamp
    */
   private generateFileName(originalName: string): string {
@@ -199,6 +207,102 @@ export class GitHubService {
     }
 
     return results
+  }
+
+  /**
+   * Upload JSON data to GitHub repository
+   */
+  async uploadJson(
+    data: any,
+    path: string,
+    message?: string,
+    branch: string = 'main',
+    retries: number = 3
+  ): Promise<GitHubUploadResponse> {
+    let lastError: Error | null = null
+
+    for (let attempt = 0; attempt < retries; attempt++) {
+      try {
+        // Convert JSON to base64
+        const content = this.jsonToBase64(data)
+
+        // Ensure path ends with .json if no extension
+        let filePath = path
+        if (!filePath.endsWith('.json')) {
+          filePath = `${filePath}.json`
+        }
+
+        // Check if file already exists (fetch latest SHA each time)
+        let existingFile: GitHubFileInfo | null = null
+        try {
+          existingFile = await this.fileExists(filePath)
+        } catch (error) {
+          console.error('Error checking if file exists, assuming it does not exist:', error)
+          existingFile = null
+        }
+
+        const uploadData: GitHubUploadRequest = {
+          message: message || `Upload JSON: ${filePath}`,
+          content,
+          branch,
+        }
+
+        // If file exists, include SHA for update
+        if (existingFile && existingFile.sha) {
+          console.log('File exists, adding SHA:', existingFile.sha)
+          uploadData.sha = existingFile.sha
+        } else {
+          console.log('File does not exist, creating new file at:', filePath)
+        }
+
+        const url = `${this.baseUrl}/repos/${this.owner}/${this.repo}/contents/${filePath}`
+        const response = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            Authorization: `token ${this.token}`,
+            Accept: 'application/vnd.github.v3+json',
+            'User-Agent': 'Hono-Cloudflare-Workers',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(uploadData),
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+
+          // If it's a 409 conflict (SHA mismatch), retry with fresh SHA
+          if (response.status === 409 && attempt < retries - 1) {
+            console.log(`409 Conflict on attempt ${attempt + 1}, retrying...`)
+            lastError = new Error(
+              `Failed to upload JSON to GitHub: ${response.status} ${response.statusText}. ${errorData.message || ''}. FilePath: ${filePath}, HasSHA: ${!!uploadData.sha}, ExistingFile: ${!!existingFile}`
+            )
+            // Add a small delay before retrying
+            await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)))
+            continue
+          }
+
+          throw new Error(
+            `Failed to upload JSON to GitHub: ${response.status} ${response.statusText}. ${errorData.message || ''}. FilePath: ${filePath}, HasSHA: ${!!uploadData.sha}, ExistingFile: ${!!existingFile}`
+          )
+        }
+
+        return await response.json()
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error))
+
+        // Only retry on 409 conflicts
+        if (error instanceof Error && error.message.includes('409') && attempt < retries - 1) {
+          console.log(`Retrying JSON upload (attempt ${attempt + 2}/${retries})...`)
+          await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)))
+          continue
+        }
+
+        console.error('GitHub JSON upload error:', error)
+        throw error
+      }
+    }
+
+    throw lastError || new Error('JSON upload failed after retries')
   }
 
   /**

@@ -4,6 +4,6 @@ export interface CloudflareBindings {
   CLOUDINARY_API_SECRET: string
   TELEGRAM_BOT_TOKEN: string
   GITHUB_TOKEN: string
-  GITHUB_OWNER?: string
-  GITHUB_REPO?: string
+  GITHUB_OWNER: string
+  GITHUB_REPO: string
 }

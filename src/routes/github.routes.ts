@@ -13,6 +13,9 @@ githubRouter.post('/upload', GitHubController.uploadImage)
 // Upload multiple images to GitHub
 githubRouter.post('/upload-multiple', GitHubController.uploadMultipleImages)
 
+// Upload JSON data to GitHub
+githubRouter.post('/upload-json', GitHubController.uploadJson)
+
 // Delete a file from GitHub
 githubRouter.delete('/delete', GitHubController.deleteFile)
 

@@ -3,15 +3,11 @@ import { GitHubService } from '../services/github.service'
 import type { CloudflareBindings } from '../types/bindings'
 
 export class GitHubController {
-  /**
-   * Verify GitHub token and repository access
-   * GET /github/verify
-   */
   static async verifyAccess(c: Context<{ Bindings: CloudflareBindings }>) {
     try {
-      const token = "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";
-      const owner = 'senghong02'
-      const repo = 'Storage'
+      const token = c.env.GITHUB_TOKEN
+      const owner = c.env.GITHUB_OWNER
+      const repo = c.env.GITHUB_REPO
 
       if (!token) {
         return c.json({ error: 'GitHub token not configured' }, 500)
@@ -33,17 +29,12 @@ export class GitHubController {
     }
   }
 
-  /**
-   * Upload a single image to GitHub repository
-   * POST /github/upload
-   * Body: multipart/form-data with 'file', 'path', 'message' (optional), 'branch' (optional)
-   */
   static async uploadImage(c: Context<{ Bindings: CloudflareBindings }>) {
     try {
       // Get environment variables
-      const token = "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";
-      const owner = 'senghong02'
-      const repo ='Storage'
+      const token = c.env.GITHUB_TOKEN
+      const owner = c.env.GITHUB_OWNER
+      const repo = c.env.GITHUB_REPO
 
       if (!token) {
         return c.json({ error: 'GitHub token not configured' }, 500)
@@ -102,19 +93,14 @@ export class GitHubController {
     }
   }
 
-  /**
-   * Upload multiple images to GitHub repository
-   * POST /github/upload-multiple
-   * Body: multipart/form-data with multiple 'files', 'path', 'message' (optional), 'branch' (optional)
-   */
   static async uploadMultipleImages(
     c: Context<{ Bindings: CloudflareBindings }>
   ) {
     try {
       // Get environment variables
-      const token = "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";
-      const owner = 'senghong02'
-      const repo = 'Storage'
+      const token = c.env.GITHUB_TOKEN
+      const owner = c.env.GITHUB_OWNER
+      const repo = c.env.GITHUB_REPO
 
       if (!token) {
         return c.json({ error: 'GitHub token not configured' }, 500)
@@ -181,17 +167,71 @@ export class GitHubController {
     }
   }
 
-  /**
-   * Delete a file from GitHub repository
-   * DELETE /github/delete
-   * Body: JSON with 'path', 'message' (optional), 'branch' (optional)
-   */
+
+  static async uploadJson(c: Context<{ Bindings: CloudflareBindings }>) {
+    try {
+      const token = c.env.GITHUB_TOKEN
+      const owner = c.env.GITHUB_OWNER
+      const repo = c.env.GITHUB_REPO
+
+      if (!token) {
+        return c.json({ error: 'GitHub token not configured' }, 500)
+      }
+
+      const githubService = new GitHubService(token, owner, repo)
+
+      const body = await c.req.json()
+      const { data, path, message, branch } = body
+
+      console.log('Upload JSON request - Path:', path, 'Branch:', branch || 'main')
+
+      if (!data) {
+        return c.json({ error: 'No data provided' }, 400)
+      }
+
+      if (!path) {
+        return c.json({ error: 'Path is required' }, 400)
+      }
+
+      const result = await githubService.uploadJson(
+        data,
+        path,
+        message || undefined,
+        branch || 'main'
+      )
+
+      return c.json(
+        {
+          success: true,
+          message: 'JSON uploaded successfully',
+          data: {
+            name: result.content.name,
+            path: result.content.path,
+            url: result.content.html_url,
+            download_url: result.content.download_url,
+            size: result.content.size,
+            sha: result.content.sha,
+          },
+        },
+        200
+      )
+    } catch (error) {
+      console.error('GitHub JSON upload error:', error)
+      return c.json(
+        {
+          error: 'JSON upload failed',
+          details: error instanceof Error ? error.message : 'Unknown error',
+        },
+        500
+      )
+    }
+  }
+
   static async deleteFile(c: Context<{ Bindings: CloudflareBindings }>) {
     try {
-      // Get environment variables
-      const token = "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";
-      const owner = 'senghong02'
-      const repo = 'Storage'
+      const token = c.env.GITHUB_TOKEN
+      const owner = c.env.GITHUB_OWNER
+      const repo = c.env.GITHUB_REPO
 
       if (!token) {
         return c.json({ error: 'GitHub token not configured' }, 500)
@@ -228,16 +268,12 @@ export class GitHubController {
     }
   }
 
-  /**
-   * List files in a directory
-   * GET /github/list?path=images/
-   */
   static async listFiles(c: Context<{ Bindings: CloudflareBindings }>) {
     try {
       // Get environment variables
-      const token = "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";
-      const owner = 'senghong02'
-      const repo = 'Storage'
+      const token = c.env.GITHUB_TOKEN
+      const owner = c.env.GITHUB_OWNER
+      const repo = c.env.GITHUB_REPO
 
       if (!token) {
         return c.json({ error: 'GitHub token not configured' }, 500)
