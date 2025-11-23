@@ -62,106 +62,313 @@ npm run cf-typegen
 
 ## API Endpoints
 
-### GitHub Routes (`/github`)
+All API endpoints require authentication via API key. Provide the API key using one of these methods:
+- `x-api-key` header
+- `Authorization: Bearer <api_key>` header
+- `api_key` query parameter
+
+### GitHub Routes (`/api/github`)
 
 #### Verify Access
 ```http
-GET /github/verify
+GET /api/github/verify
 ```
 Verify GitHub token and repository access.
 
-#### Upload Single Image
-```http
-POST /github/upload
-Content-Type: multipart/form-data
-
+**Response:**
+```json
 {
-  "file": File,
-  "path": "folder/filename.jpg",
-  "message": "Upload image" (optional),
-  "branch": "main" (optional)
+  "authenticated": boolean,
+  "user": "username",
+  "repoAccess": boolean,
+  "permissions": ["push", "pull", "admin"]
 }
 ```
 
-#### Upload Multiple Images
+#### Upload Single Image
 ```http
-POST /github/upload-multiple
+POST /api/github/upload
 Content-Type: multipart/form-data
 
+file: File
+path: "folder/filename.jpg" (optional - if omitted, auto-generates filename)
+message: "Upload image" (optional, default: "Upload {filename}")
+branch: "main" (optional, default: "main")
+```
+
+**Response:**
+```json
 {
-  "files": [File, File, ...],
-  "path": "folder/",
-  "message": "Upload images" (optional),
-  "branch": "main" (optional)
+  "success": true,
+  "message": "File uploaded successfully",
+  "data": {
+    "name": "filename.jpg",
+    "path": "folder/filename.jpg",
+    "url": "https://github.com/owner/repo/blob/main/...",
+    "download_url": "https://raw.githubusercontent.com/...",
+    "size": 1024,
+    "sha": "abc123..."
+  }
 }
 ```
 
 **Features:**
+- Automatic filename generation with timestamp if path is a directory
 - Automatic retry on 409 conflicts (up to 3 attempts)
-- Sequential uploads to prevent race conditions
 - SHA conflict resolution
 
-#### Delete File
+#### Upload Multiple Images
 ```http
-DELETE /github/delete
+POST /api/github/upload-multiple
+Content-Type: multipart/form-data
+
+files: [File, File, ...]
+path: "folder/" (required)
+message: "Upload images" (optional)
+branch: "main" (optional)
+```
+
+**Response:** Array of upload responses (same as single upload)
+
+**Features:**
+- Sequential uploads to prevent race conditions
+- Automatic filename generation for each file
+
+#### Upload JSON
+```http
+POST /api/github/upload-json
 Content-Type: application/json
 
 {
-  "path": "folder/filename.jpg",
+  "data": { /* any JSON object */ },
+  "path": "data/config" (optional extension added if needed),
+  "message": "Upload JSON config" (optional),
+  "branch": "main" (optional)
+}
+```
+
+**Response:** Same as upload single image
+
+#### Delete File
+```http
+DELETE /api/github/delete
+Content-Type: application/json
+
+{
+  "path": "folder/filename.jpg" (required),
   "message": "Delete file" (optional),
   "branch": "main" (optional)
 }
 ```
 
-#### List Files
-```http
-GET /github/list?path=folder/
+**Response:**
+```json
+{
+  "success": true,
+  "message": "File deleted successfully"
+}
 ```
 
-### Cloudinary Routes
+#### List Files
+```http
+GET /api/github/list?path=folder/
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "name": "file.jpg",
+      "path": "folder/file.jpg",
+      "type": "file",
+      "size": 1024,
+      "url": "https://github.com/...",
+      "download_url": "https://raw.githubusercontent.com/..."
+    }
+  ]
+}
+```
+
+### Cloudinary Routes (`/api`)
 
 #### Upload Single Image
 ```http
-POST /upload
+POST /api/upload
 Content-Type: multipart/form-data
 
+file: File
+```
+
+**Supported formats:** JPEG, PNG, GIF, WebP
+
+**Response:**
+```json
 {
-  "file": File
+  "secure_url": "https://res.cloudinary.com/...",
+  "public_id": "hono-uploads/filename",
+  "format": "jpg",
+  "width": 1920,
+  "height": 1080,
+  "bytes": 102400
 }
 ```
 
 #### Upload Multiple Images
 ```http
-POST /upload-multiple
+POST /api/upload-multiple
 Content-Type: multipart/form-data
 
+files: [File, File, ...]
+```
+
+**Response:**
+```json
 {
-  "files": [File, File, ...]
+  "successful": [
+    {
+      "fileName": "image1.jpg",
+      "url": "https://res.cloudinary.com/...",
+      "publicId": "hono-uploads/image1",
+      "format": "jpg",
+      "width": 1920,
+      "height": 1080,
+      "size": 102400
+    }
+  ],
+  "failed": [
+    {
+      "fileName": "invalid.bmp",
+      "error": "Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed"
+    }
+  ],
+  "totalUploaded": 1,
+  "totalFailed": 1,
+  "total": 2
 }
 ```
 
-### Telegram Routes (`/telegram`)
+### Telegram Routes (`/api/telegram`)
 
 #### Get Bot Info
 ```http
-GET /telegram/me
+GET /api/telegram/me
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "bot": {
+    "id": 123456789,
+    "is_bot": true,
+    "first_name": "BotName",
+    "username": "my_bot",
+    "can_join_groups": true,
+    "can_read_all_group_messages": false,
+    "supports_inline_queries": false
+  }
+}
 ```
 
 #### Get Updates
 ```http
-GET /telegram/updates
+GET /api/telegram/updates?offset=0&limit=100&timeout=0
+```
+
+**Query Parameters:**
+- `offset` (optional): Identifier of the first update to be returned
+- `limit` (optional, default: 100): Limits the number of updates (1-100)
+- `timeout` (optional, default: 0): Long polling timeout in seconds (0-50)
+
+**Response:**
+```json
+{
+  "success": true,
+  "count": 2,
+  "updates": [
+    {
+      "update_id": 123456,
+      "message": {
+        "message_id": 1,
+        "date": 1234567890,
+        "chat": { "id": 987654 },
+        "text": "Hello bot"
+      }
+    }
+  ]
+}
 ```
 
 #### Send Message
 ```http
-POST /telegram/send
+POST /api/telegram/send
 Content-Type: application/json
 
 {
-  "chat_id": "123456789",
+  "chatId": 123456789,
   "text": "Your message"
 }
 ```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": {
+    "message_id": 1,
+    "date": 1234567890,
+    "chat": { "id": 123456789 },
+    "text": "Your message"
+  }
+}
+```
+
+## Core Functions
+
+### GitHubService
+
+**Methods:**
+
+- `fileToBase64(file: File): Promise<string>` - Convert file to base64 encoding
+- `jsonToBase64(data: any): string` - Convert JSON object to base64 encoding
+- `generateFileName(originalName: string): string` - Generate unique filename with timestamp
+- `fileExists(path: string): Promise<GitHubFileInfo | null>` - Check if file exists and get its SHA
+- `uploadImage(file: File, path: string, message?: string, branch?: string, retries?: number): Promise<GitHubUploadResponse>` - Upload single image with retry logic
+- `uploadMultipleImages(files: File[], basePath: string, message?: string, branch?: string): Promise<GitHubUploadResponse[]>` - Upload multiple images sequentially
+- `uploadJson(data: any, path: string, message?: string, branch?: string, retries?: number): Promise<GitHubUploadResponse>` - Upload JSON data with retry logic
+- `deleteFile(path: string, message?: string, branch?: string): Promise<void>` - Delete file from repository
+- `verifyAccess(): Promise<VerificationResult>` - Verify token and repository access
+- `listFiles(path?: string): Promise<GitHubFileInfo[]>` - List files in directory
+
+### CloudinaryService
+
+**Methods:**
+
+- `uploadImage(file: File): Promise<any>` - Upload single image to Cloudinary
+  - Validates file type (JPEG, PNG, GIF, WebP)
+  - Returns upload result with URL and metadata
+- `uploadMultipleImages(files: File[]): Promise<UploadResult>` - Upload multiple images
+  - Returns successful uploads and failed uploads separately
+  - Continues on validation errors without throwing
+
+### TelegramService
+
+**Methods:**
+
+- `getUpdates(offset?: number, limit?: number, timeout?: number): Promise<TelegramUpdate[]>` - Retrieve bot updates using long polling
+- `sendMessage(chatId: number, text: string): Promise<any>` - Send text message to chat
+- `getMe(): Promise<any>` - Get bot information and permissions
+
+### Middleware
+
+**apiKeyAuth middleware** - Validates API key from:
+- `x-api-key` header (recommended)
+- `Authorization: Bearer <key>` header
+- `api_key` query parameter
+
+Returns 401 Unauthorized if key is invalid or missing.
 
 ## Configuration
 
