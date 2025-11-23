@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Primary API</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 48px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 800px;
+      width: 100%;
+    }
+    h1 {
+      color: #333;
+      font-size: 2.5rem;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    p {
+      color: #666;
+      font-size: 1.125rem;
+      line-height: 1.6;
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .api-section {
+      margin-bottom: 24px;
+    }
+    .api-section h2 {
+      color: #333;
+      font-size: 1.25rem;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #667eea;
+    }
+    .api-list {
+      list-style: none;
+      margin-bottom: 16px;
+    }
+    .api-list li {
+      padding: 8px 0;
+      color: #666;
+      font-size: 0.95rem;
+    }
+    .api-list li strong {
+      color: #667eea;
+      font-family: monospace;
+      margin-right: 8px;
+    }
+    .links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 32px;
+      padding-top: 32px;
+      border-top: 1px solid #e0e0e0;
+    }
+    .link {
+      display: inline-block;
+      padding: 12px 24px;
+      background: #667eea;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+    }
+    .link.primary {
+      background: #28a745;
+    }
+    .link.primary:hover {
+      box-shadow: 0 8px 16px rgba(40, 167, 69, 0.4);
+    }
+    .link.secondary {
+      background: #764ba2;
+    }
+    .link.secondary:hover {
+      box-shadow: 0 8px 16px rgba(118, 75, 162, 0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Primary API</h1>
+    <p>Multi-service API with Telegram, GitHub, and Cloudinary integrations</p>
+
+    <div class="api-section">
+      <h2>Telegram API</h2>
+      <ul class="api-list">
+        <li><strong>GET</strong> /api/telegram/updates - Get bot updates</li>
+        <li><strong>GET</strong> /api/telegram/me - Get bot information</li>
+        <li><strong>POST</strong> /api/telegram/send - Send a message</li>
+      </ul>
+    </div>
+
+    <div class="api-section">
+      <h2>GitHub API</h2>
+      <ul class="api-list">
+        <li><strong>GET</strong> /api/github/verify - Verify GitHub access</li>
+        <li><strong>POST</strong> /api/github/upload - Upload single image</li>
+        <li><strong>POST</strong> /api/github/upload-multiple - Upload multiple images</li>
+        <li><strong>POST</strong> /api/github/upload-json - Upload JSON data</li>
+        <li><strong>DELETE</strong> /api/github/delete - Delete a file</li>
+        <li><strong>GET</strong> /api/github/list - List files in directory</li>
+      </ul>
+    </div>
+
+    <div class="api-section">
+      <h2>Cloudinary API</h2>
+      <ul class="api-list">
+        <li><strong>POST</strong> /api/upload - Upload single image</li>
+        <li><strong>POST</strong> /api/upload-multiple - Upload multiple images</li>
+      </ul>
+    </div>
+
+    <div class="links">
+      <a href="/swagger" class="link primary">API Documentation (Swagger)</a>
+      <a href="/openapi.json" class="link">OpenAPI Spec</a>
+      <a href="https://hono.dev" class="link secondary" target="_blank">Hono Docs</a>
+    </div>
+  </div>
+</body>
+</html>
