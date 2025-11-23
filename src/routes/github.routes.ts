@@ -1,8 +1,8 @@
 import { Hono } from 'hono'
 import { GitHubController } from '../controllers/github.controller'
-import type { CloudflareBindings } from '../types/bindings'
+import type { EnvBindings } from '../types/bindings'
 
-const githubRouter = new Hono<{ Bindings: CloudflareBindings }>()
+const githubRouter = new Hono<{ Bindings: EnvBindings }>()
 
 // Verify GitHub access
 githubRouter.get('/verify', GitHubController.verifyAccess)

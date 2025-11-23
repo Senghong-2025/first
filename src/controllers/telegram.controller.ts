@@ -1,9 +1,9 @@
 import type { Context } from 'hono'
 import { TelegramService } from '../services/telegram'
-import type { CloudflareBindings } from '../types/bindings'
+import type { EnvBindings } from '../types/bindings'
 
 export class TelegramController {
-  static async getUpdates(c: Context<{ Bindings: CloudflareBindings }>) {
+  static async getUpdates(c: Context<{ Bindings: EnvBindings }>) {
     try {
       const botToken = c.env.TELEGRAM_BOT_TOKEN
       const telegram = new TelegramService(botToken)
@@ -38,7 +38,7 @@ export class TelegramController {
     }
   }
 
-  static async getBotInfo(c: Context<{ Bindings: CloudflareBindings }>) {
+  static async getBotInfo(c: Context<{ Bindings: EnvBindings }>) {
     try {
       const botToken = c.env.TELEGRAM_BOT_TOKEN
       const telegram = new TelegramService(botToken)
@@ -62,7 +62,7 @@ export class TelegramController {
     }
   }
 
-  static async sendMessage(c: Context<{ Bindings: CloudflareBindings }>) {
+  static async sendMessage(c: Context<{ Bindings: EnvBindings }>) {
     try {
       const botToken = c.env.TELEGRAM_BOT_TOKEN
       const telegram = new TelegramService(botToken)

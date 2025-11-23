@@ -1,9 +1,9 @@
 import type { Context } from 'hono'
 import { GitHubService } from '../services/github.service'
-import type { CloudflareBindings } from '../types/bindings'
+import type { EnvBindings } from '../types/bindings'
 
 export class GitHubController {
-  static async verifyAccess(c: Context<{ Bindings: CloudflareBindings }>) {
+  static async verifyAccess(c: Context<{ Bindings: EnvBindings }>) {
     try {
       const token = c.env.GITHUB_TOKEN
       const owner = c.env.GITHUB_OWNER
@@ -29,7 +29,7 @@ export class GitHubController {
     }
   }
 
-  static async uploadImage(c: Context<{ Bindings: CloudflareBindings }>) {
+  static async uploadImage(c: Context<{ Bindings: EnvBindings }>) {
     try {
       // Get environment variables
       const token = c.env.GITHUB_TOKEN
@@ -94,7 +94,7 @@ export class GitHubController {
   }
 
   static async uploadMultipleImages(
-    c: Context<{ Bindings: CloudflareBindings }>
+    c: Context<{ Bindings: EnvBindings }>
   ) {
     try {
       // Get environment variables
@@ -168,7 +168,7 @@ export class GitHubController {
   }
 
 
-  static async uploadJson(c: Context<{ Bindings: CloudflareBindings }>) {
+  static async uploadJson(c: Context<{ Bindings: EnvBindings }>) {
     try {
       const token = c.env.GITHUB_TOKEN
       const owner = c.env.GITHUB_OWNER
@@ -227,7 +227,7 @@ export class GitHubController {
     }
   }
 
-  static async deleteFile(c: Context<{ Bindings: CloudflareBindings }>) {
+  static async deleteFile(c: Context<{ Bindings: EnvBindings }>) {
     try {
       const token = c.env.GITHUB_TOKEN
       const owner = c.env.GITHUB_OWNER
@@ -268,7 +268,7 @@ export class GitHubController {
     }
   }
 
-  static async listFiles(c: Context<{ Bindings: CloudflareBindings }>) {
+  static async listFiles(c: Context<{ Bindings: EnvBindings }>) {
     try {
       // Get environment variables
       const token = c.env.GITHUB_TOKEN

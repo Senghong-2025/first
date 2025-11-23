@@ -1,9 +1,9 @@
 import type { Context } from 'hono'
 import { CloudinaryService } from '../services/cloudinary.service'
-import type { CloudflareBindings } from '../types/bindings'
+import type { EnvBindings } from '../types/bindings'
 
 export class CloudinaryController {
-  static async uploadImage(c: Context<{ Bindings: CloudflareBindings }>) {
+  static async uploadImage(c: Context<{ Bindings: EnvBindings }>) {
     try {
       // Get environment variables
       const cloudName = c.env.CLOUDINARY_CLOUD_NAME
@@ -39,7 +39,7 @@ export class CloudinaryController {
     }
   }
 
-  static async uploadMultipleImages(c: Context<{ Bindings: CloudflareBindings }>) {
+  static async uploadMultipleImages(c: Context<{ Bindings: EnvBindings }>) {
     try {
       // Get environment variables
       const cloudName = c.env.CLOUDINARY_CLOUD_NAME

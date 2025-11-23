@@ -3,9 +3,9 @@ import { cors } from 'hono/cors'
 import telegramRouter from './routes/telegram.routes'
 import cloudinaryRouter from './routes/cloudinary.routes'
 import githubRouter from './routes/github.routes'
-import type { CloudflareBindings } from './types/bindings'
+import type { EnvBindings } from './types/bindings'
 
-const app = new Hono<{ Bindings: CloudflareBindings }>()
+const app = new Hono<{ Bindings: EnvBindings }>()
 
 // Enable CORS for all origins
 app.use('/*', cors({

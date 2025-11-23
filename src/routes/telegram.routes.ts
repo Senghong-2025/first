@@ -1,8 +1,8 @@
 import { Hono } from 'hono'
 import { TelegramController } from '../controllers/telegram.controller'
-import type { CloudflareBindings } from '../types/bindings'
+import type { EnvBindings } from '../types/bindings'
 
-const telegramRouter = new Hono<{ Bindings: CloudflareBindings }>()
+const telegramRouter = new Hono<{ Bindings: EnvBindings }>()
 
 // Get bot updates
 telegramRouter.get('/updates', TelegramController.getUpdates)
