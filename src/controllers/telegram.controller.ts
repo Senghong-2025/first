@@ -14,7 +14,7 @@ export class TelegramController {
 
       const offset = c.req.query('offset')
         ? parseInt(c.req.query('offset')!)
-        : undefined
+        : 1
       const limit = c.req.query('limit')
         ? parseInt(c.req.query('limit')!)
         : 100

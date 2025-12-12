@@ -7,4 +7,5 @@ export interface EnvBindings {
   GITHUB_TOKEN: string
   GITHUB_OWNER: string
   GITHUB_REPO: string
+  CRON_SECRET_TOKEN?: string
 }

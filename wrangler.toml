@@ -2,3 +2,6 @@ name = "first"
 compatibility_date = "2025-11-22"
 main = "src/index.ts"
 compatibility_flags = ["nodejs_compat"]
+
+[triggers]
+crons = ["* * * * *"]
