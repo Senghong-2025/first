@@ -104,7 +104,6 @@ export class GitHubController {
       const formData = await c.req.formData()
       const files: File[] = []
 
-      // Extract all files from form data
       for (const [key, value] of formData.entries()) {
         if (key === 'file' || key === 'files') {
           if (value instanceof File) {
